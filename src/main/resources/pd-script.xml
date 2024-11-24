@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<entity-mappings
+	xmlns="http://java.sun.com/xml/ns/persistence"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/persistence http://java.sun.com/xml/ns/persistence/orm_2_0.xsd"
+	version="2.0">
+	<named-native-query name="retrieveQRCashTxn">
+		<query>
+            <![CDATA[
+            SELECT
+                TXN_REF_NO "txnRefNo",
+                REQ_ID "reqId",
+                ATM_ID "atmId",
+                ATM_LOCATION "atmLocation",
+                GEN_TYPE "genType",
+                GEN_AMOUNT "genAmount",
+                GEN_CURRENCY "genCurrency",
+                GEN_TIMESTAMP "genTimestamp",
+                GEN_LANGUAGE "genLanguage",
+                QR_DATA "qrData",
+                QR_SERVICE_TYPE "qrServiceType",
+                QR_STATUS "qrStatus",
+                TXN_ACCOUNT "txnAccount",
+                TXN_AMOUNT "txnAmount",
+                TXN_CURRENCY "txnCurrency",
+                TXN_DATE "txnDate",
+                TXN_STATUS_CODE "txnStatusCode",
+                TXN_STATUS_INFO "txnStatusInfo",
+                DAILY_DEPOSIT_AMT "dailyDepositAmt",
+                DAILY_DEPOSIT_AMT_REMAINING "dailyDepositAmtRemaining",
+                CREATED_BY "createdBy",
+                CREATED_ON "createdOn",
+                MODIFIED_BY "modifiedBy",
+                MODIFIED_ON "modifiedOn",
+                ATTR_1_NAME "attr1Name",
+                ATTR_1_VALUE "attr1Value",
+                ATTR_2_NAME "attr2Name",
+                ATTR_2_VALUE "attr2Value",
+                ATTR_3_NAME "attr3Name",
+                ATTR_3_VALUE "attr3Value"
+            FROM
+                QR_CASH_TXN
+            WHERE
+                REQ_ID = :reqId
+                AND ATM_ID = :atmId
+                AND TXN_REF_NO = :txnRefNo
+            ]]>
+        </query>
+	</named-native-query>
+</entity-mappings>

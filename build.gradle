@@ -1,0 +1,43 @@
+plugins {
+	id 'java'
+	id 'war'
+	id 'org.springframework.boot' version '3.4.0'
+	id 'io.spring.dependency-management' version '1.1.6'
+}
+
+group = 'phnomden'
+version = '0.0.1-SNAPSHOT'
+
+java {
+	toolchain {
+		languageVersion = JavaLanguageVersion.of(21)
+	}
+}
+
+repositories {
+	mavenCentral()
+}
+
+dependencies {
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+	providedRuntime 'org.springframework.boot:spring-boot-starter-tomcat'
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+	
+	// google
+    implementation 'com.google.code.gson:gson:2.11.0'
+    // commons-lang3
+	implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.17.0'
+	// postgresql
+	implementation group: 'org.postgresql', name: 'postgresql', version: '42.7.4'
+	// lombok
+	compileOnly group: 'org.projectlombok', name: 'lombok', version: '1.18.34'
+	// spring-boot-starter-data-jpa
+	implementation group: 'org.springframework.boot', name: 'spring-boot-starter-data-jpa', version: '3.3.5'
+	
+	
+}
+
+tasks.named('test') {
+	useJUnitPlatform()
+}
