@@ -1,42 +1,56 @@
 package phnomden.common;
 
 public enum QRCashTxnStatusCode {
-    GENERATED(2, "GENERATED"),
-    SUCCESS(0, "SUCCESS"),
-    COMPLETED(0, "COMPLETED"),
-    FAILED(1, "FAILED");
+    GENERATED(2, "pending", "GENERATED"),
+    SUCCESS(0, "successful", "SUCCESS"),
+    COMPLETED(0, "successful", "COMPLETED"),
+    FAILED(1, "failed", "FAILED"),
+    CANCELLED(3, "customer cancelled on QR scanning screen", "CANCELLED"),
+    TIMEOUT (4, "customer timeout on QR scanning screen", "TIMEOUT");
 
-    private final int code;
-    private final String description;
+    private final int btiCode;
+    private final String btiDescription;
+    private final String wingCode;
 
-    QRCashTxnStatusCode(int code, String description) {
-        this.code = code;
-        this.description = description;
+    QRCashTxnStatusCode(int btiCode, String btiDescription, String wingCode) {
+        this.btiCode = btiCode;
+        this.btiDescription = btiDescription;
+        this.wingCode = wingCode;
     }
 
-    public int getCode() {
-        return code;
+    public int getBtiCode() {
+        return btiCode;
     }
 
-    public String getDescription() {
-        return description;
+    public String getBtiDescription() {
+        return btiDescription;
     }
 
-    public static QRCashTxnStatusCode fromCode(int code) {
-        for (QRCashTxnStatusCode status : QRCashTxnStatusCode.values()) {
-            if (status.getCode() == code) {
+    public String getWingCode() {
+        return wingCode;
+    }
+
+    public static QRCashTxnStatusCode fromBtiCode(int btiCode) {
+        for (QRCashTxnStatusCode status : values()) {
+            if (status.btiCode == btiCode) {
                 return status;
             }
         }
-        throw new IllegalArgumentException("Unexpected code: " + code);
+        throw new IllegalArgumentException("Invalid btiCode: " + btiCode);
     }
 
-    public static QRCashTxnStatusCode fromDescription(String description) {
-        for (QRCashTxnStatusCode status : QRCashTxnStatusCode.values()) {
-            if (status.getDescription().equalsIgnoreCase(description)) {
+    public static QRCashTxnStatusCode fromWingCode(String wingCode) {
+        for (QRCashTxnStatusCode status : values()) {
+            if (status.wingCode.equalsIgnoreCase(wingCode)) {
                 return status;
             }
         }
-        throw new IllegalArgumentException("Unexpected description: " + description);
+        throw new IllegalArgumentException("Invalid wingCode: " + wingCode);
+    }
+
+    @Override
+    public String toString() {
+        return String.format("QRCashTxnStatusCode{btiCode=%d, btiDescription='%s', wingCode='%s'}",
+                btiCode, btiDescription, wingCode);
     }
 }

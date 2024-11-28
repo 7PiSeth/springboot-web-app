@@ -17,7 +17,7 @@ import lombok.experimental.FieldDefaults;
 @Table(name = "QR_CASH_TXN",  schema = "PUBLIC")
 @Setter
 @Getter
-public class QRCashTxnEntity {
+public class MtxQrCashDepositWithdrawalEntity {
 	@Id
 	@Column(name = "TXN_REF_NO", length = 36, nullable = false)
 	private String txnRefNo;

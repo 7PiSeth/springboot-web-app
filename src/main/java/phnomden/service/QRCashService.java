@@ -1,12 +1,9 @@
 package phnomden.service;
 
-import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Service;
-
 import phnomden.dto.Data;
+import org.springframework.http.ResponseEntity;
 
-@Service
-public interface QRCashTxnService {
+public interface QRCashService {
 	ResponseEntity<Data> generateQR(Data reqData) throws Exception;
 	ResponseEntity<Data> inquireStatus(Data reqData) throws Exception;
 	ResponseEntity<Data> updateStatus(Data reqData) throws Exception;

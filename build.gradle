@@ -34,7 +34,8 @@ dependencies {
 	compileOnly group: 'org.projectlombok', name: 'lombok', version: '1.18.34'
 	// spring-boot-starter-data-jpa
 	implementation group: 'org.springframework.boot', name: 'spring-boot-starter-data-jpa', version: '3.3.5'
-	
+	// https://mvnrepository.com/artifact/org.apache.httpcomponents/httpclient
+	implementation group: 'org.apache.httpcomponents', name: 'httpclient', version: '4.5.13'
 	
 }
 
