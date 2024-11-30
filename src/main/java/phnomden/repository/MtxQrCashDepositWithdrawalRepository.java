@@ -19,7 +19,7 @@ public interface MtxQrCashDepositWithdrawalRepository extends JpaRepository<MtxQ
 			@Param("txnRefNo")String txnRefNo) throws Exception;
 		
 	@Transactional
-	@Query(value = "SELECT * FROM QR_CASH_TXN WHERE req_id = :reqId AND atm_id = :atmId AND txn_ref_no = :txnRefNo FOR UPDATE", nativeQuery = true)
+	@Query(value = "SELECT * FROM MTX_QR_CASH_DEPOSIT_WITHDRAWAL WHERE req_id = :reqId AND atm_id = :atmId AND txn_ref_no = :txnRefNo FOR UPDATE", nativeQuery = true)
 	MtxQrCashDepositWithdrawalEntity findQRCashTxnForUpdate(
 			@Param("reqId")String reqId, 
 			@Param("atmId")String atmId, 

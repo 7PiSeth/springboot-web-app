@@ -8,7 +8,7 @@ import phnomden.repository.MtxQrCashDepositWithdrawalRepository;
 import phnomden.exception.ApplicationException;
 import phnomden.dto.*;
 import phnomden.service.QRCashService;
-import phnomden.util.ValidatorUtil;
+import phnomden.util.UtilValidater;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -42,28 +42,28 @@ public class QRCashServiceImpl implements QRCashService {
 	private String atmCashInUrl;
 
 	@Override
-	public ResponseEntity<Data> generateQR(Data reqData) throws Exception {
-		key = generateUniqueKey(reqData);
+	public ResponseEntity<Data> generateQR(Data request) throws Exception {
+		key = generateUniqueKey(request);
 		log.info("{} ============Start Generate QR============", key);
-		log.info("{} reqData: {}", key, gson.toJson(reqData));
+		log.info("{} request: {}", key, gson.toJson(request));
 		try {
 			// validate request
-			validateGenerateQR(reqData);
+			validateGenerateQR(request);
 
 			// generate QR data
 			String uniqueID = UUID.randomUUID().toString();
-			String genType = reqData.getString("genType"); // DEP, WDR
+			String genType = request.getString("genType"); // DEP, WDR
 			String qrData = genType.equals("DEP") ? "ATMDEPOSIT-" + uniqueID : "ATMWITHDRAWAL-" + uniqueID;
 
 			// set response
 			Data response = new Data();
-			response.setString("serviceCode", reqData.getString("serviceCode"));
-			response.setString("reqID", reqData.getString("reqID"));
-			response.setString("atmID", reqData.getString("atmID"));
-			response.setString("genTimeStamp", reqData.getString("genTimeStamp"));
-			response.setString("genType", reqData.getString("genType"));
-			response.setString("genCurrency", reqData.getString("genCurrency"));
-			response.setInt("genAmount", reqData.getInt("genAmount"));
+			response.setString("serviceCode", request.getString("serviceCode"));
+			response.setString("reqID", request.getString("reqID"));
+			response.setString("atmID", request.getString("atmID"));
+			response.setString("genTimeStamp", request.getString("genTimeStamp"));
+			response.setString("genType", request.getString("genType"));
+			response.setString("genCurrency", request.getString("genCurrency"));
+			response.setInt("genAmount", request.getInt("genAmount"));
 			response.setInt("qrType", 1); // 1:text by default
 			response.setString("qrData", qrData);
 			response.setString("trxRefNo", uniqueID);
@@ -77,36 +77,36 @@ public class QRCashServiceImpl implements QRCashService {
 			return ResponseEntity.ok(response);
 		} catch (ApplicationException ae) {
 			log.error("{} Application error: ", key, ae);
-			return ResponseEntity.ok(respondGenerateQRError(reqData));
+			return ResponseEntity.ok(respondGenerateQRError(request));
 		} catch (Exception e) {
 			log.error("{} General error: ", key, e);
-			return ResponseEntity.ok(respondGenerateQRError(reqData));
+			return ResponseEntity.ok(respondGenerateQRError(request));
 		}
 	}
 
 	@Override
-	public ResponseEntity<Data> inquireStatus(Data reqData) throws Exception {
-		key = generateUniqueKey(reqData);
+	public ResponseEntity<Data> inquireStatus(Data request) throws Exception {
+		key = generateUniqueKey(request);
 		log.info("{} ============Start Inquire Status============", key);
-		log.info("{} reqData: {}", key, gson.toJson(reqData));
+		log.info("{} request: {}", key, gson.toJson(request));
 		try {
 			// validate request
-			validateInquireStatus(reqData);
+			validateInquireStatus(request);
 
 			// retrieve txn record from db
-			Data qrCashTxnInfo = retrieveQRCashTxn(reqData);
+			Data qrCashTxnInfo = retrieveQRCashTxn(request);
 			if(qrCashTxnInfo == null) {
-				log.error("{} <<<< Error: record not found in database");
+				log.error("{} <<<< Error: record not found in database", key);
 				throw new ApplicationException(ErrorCode.DATA_NOT_FOUND);
 			}
 			log.info("{} data from database: {}", key, gson.toJson(qrCashTxnInfo));
 
 			// set response
 			Data response = new Data();
-			response.setString("serviceCode", reqData.getString("serviceCode"));
-			response.setString("reqID", reqData.getString("reqID"));
-			response.setString("atmID", reqData.getString("atmID"));
-			response.setString("trxRefNo", reqData.getString("trxRefNo"));
+			response.setString("serviceCode", request.getString("serviceCode"));
+			response.setString("reqID", request.getString("reqID"));
+			response.setString("atmID", request.getString("atmID"));
+			response.setString("trxRefNo", request.getString("trxRefNo"));
 			response.setInt("statusCode", QRCashTxnStatusCode.valueOf(qrCashTxnInfo.getString("qrStatus")).getBtiCode());
 			response.setString("statusInfo", QRCashTxnStatusCode.valueOf(qrCashTxnInfo.getString("qrStatus")).getBtiDescription());
 			response.setString("trxType", qrCashTxnInfo.getString("genType"));
@@ -125,85 +125,88 @@ public class QRCashServiceImpl implements QRCashService {
 			return ResponseEntity.ok(response);
 		} catch (ApplicationException ae) {
 			log.error("{} Application error: ", key, ae);
-			return ResponseEntity.ok(respondInquireStatusError(reqData));
+			return ResponseEntity.ok(respondInquireStatusError(request));
 		} catch (Exception e) {
 			log.error("{} General error: ", key, e);
-			return ResponseEntity.ok(respondInquireStatusError(reqData));
+			return ResponseEntity.ok(respondInquireStatusError(request));
 		}
 	}
 
 	@Override
-	public ResponseEntity<Data> updateStatus(Data reqData) throws Exception {
-		key = generateUniqueKey(reqData);
+	public ResponseEntity<Data> updateStatus(Data request) throws Exception {
+		key = generateUniqueKey(request);
 		log.info("{} ============Start Update Status============", key);
-		log.info("{} reqData: {}", key, gson.toJson(reqData));
+		log.info("{} request: {}", key, gson.toJson(request));
 		try {
 			// validate request
-			validateUpdateStatus(reqData);
+			validateUpdateStatus(request);
 
-			String trxType = reqData.getString("trxType");
+			String trxType = request.getString("trxType");
 			switch (trxType) {
 			case "WDR":
-					updateQRCashTxnStatus(reqData);
+					updateQRCashTxnStatus(request);
 				break;
 			case "DEP":
-					updateQRCashDepositTxn(reqData);
+					updateQRCashDepositTxn(request);
 				break;
 			}
 			// set response 
 			Data response  = new Data();
-			response.setString("serviceCode", reqData.getString("serviceCode"));
-			response.setString("reqID", reqData.getString("reqID"));
-			response.setString("atmID", reqData.getString("atmID"));
-			response.setString("trxRefNo", reqData.getString("trxRefNo"));
+			response.setString("serviceCode", request.getString("serviceCode"));
+			response.setString("reqID", request.getString("reqID"));
+			response.setString("atmID", request.getString("atmID"));
+			response.setString("trxRefNo", request.getString("trxRefNo"));
 			response.setInt("statusCode", QRCashTxnStatusCode.SUCCESS.getBtiCode());
 			response.setString("statusInfo", QRCashTxnStatusCode.SUCCESS.getBtiDescription());
-			response.setString("trxType", reqData.getString("trxType"));
-			response.setString("trxTimeStamp", reqData.getString("trxTimeStamp"));
-			response.setString("trxAccountNo", reqData.getString("trxAccountNo"));
-			response.setString("trxCurrency", reqData.getString("trxCurrency"));
-			response.setInt("trxAmount", reqData.getInt("trxAmount"));
-			response.setInt("txnStatusCode", reqData.getInt("txnStatusCode"));
-			response.setString("txnStatusInfo", reqData.getString("txnStatusInfo"));
+			response.setString("trxType", request.getString("trxType"));
+			response.setString("trxTimeStamp", request.getString("trxTimeStamp"));
+			response.setString("trxAccountNo", request.getString("trxAccountNo"));
+			response.setString("trxCurrency", request.getString("trxCurrency"));
+			response.setInt("trxAmount", request.getInt("trxAmount"));
+			response.setInt("txnStatusCode", request.getInt("txnStatusCode"));
+			response.setString("txnStatusInfo", request.getString("txnStatusInfo"));
 
 			log.info("{} response: {}", key, gson.toJson(response));
 			return ResponseEntity.ok(response);
 		} catch (ApplicationException ae) {
 			log.error("{} Application error: ", key, ae);
-			return ResponseEntity.ok(respondUpdateStatusError(reqData));
+			return ResponseEntity.ok(respondUpdateStatusError(request));
 		} catch (Exception e) {
 			log.error("{} General error: ", key, e);
-			return ResponseEntity.ok(respondUpdateStatusError(reqData));
+			return ResponseEntity.ok(respondUpdateStatusError(request));
 		}
 	}
 
-	private void updateQRCashDepositTxn(Data reqData) throws Exception {
-		if(reqData.getInt("txnStatusCode") == 0) { // successful case from ATM
-			callToCashIn(reqData); // posting txn at backend mobile and also update status in db
-			updateQRCashTxnStatus(reqData); // this is fake
-		} else { // failed case from ATM (txn cancelled or timeout)
-			updateQRCashTxnStatus(reqData); // update status in db
+	private void updateQRCashDepositTxn(Data request) throws Exception {
+		if(request.getInt("txnStatusCode") == 0) { // successful case from ATM
+			callToCashIn(request); // posting txn at backend mobile and also update status in db
+		} else { // failed case from ATM (txn cancelled or timeout, etc..)
+			updateQRCashTxnStatus(request); // update status in db
 		}
 	}
 
-	private void updateQRCashTxnStatus(Data reqData) throws Exception {
+	private void updateQRCashTxnStatus(Data request) throws Exception {
 		// lock and fetch the transaction for update
 		MtxQrCashDepositWithdrawalEntity transaction = mtxQrCashDepositWithdrawalRepository.findQRCashTxnForUpdate(
-				reqData.getString("reqID"), 
-				reqData.getString("atmID"), 
-				reqData.getString("trxRefNo"));
+				request.getString("reqID"), 
+				request.getString("atmID"), 
+				request.getString("trxRefNo"));
 		log.info("{} Transaction record from db: {}", key, gson.toJson(transaction));
 
         if (transaction == null) {
         	log.error("{} <<<< Transaction for update not found!", key);
-        	log.info("{} reqID: {}, atmID: {}, trxRefNo: {}", key, reqData.getString("reqID"), reqData.getString("atmID"), reqData.getString("trxRefNo"));
+        	log.info("{} reqID: {}, atmID: {}, trxRefNo: {}", key, request.getString("reqID"), request.getString("atmID"), request.getString("trxRefNo"));
             throw new ApplicationException(ErrorCode.TXN_NOT_FOUND);
         }
 
         // update transaction
-        transaction.setTxnStatusCode(reqData.getString("txnStatusCode"));
-        transaction.setTxnStatusInfo(reqData.getString("txnStatusInfo"));
-        transaction.setModifiedOn(changeToPSPDateTimeFormat(reqData.getString("trxTimeStamp")));
+        int txnStatusCode = request.getInt("txnStatusCode");
+        if( txnStatusCode != 0 ) { // failed case from ATM (txn cancelled or timeout, etc..)
+        	transaction.setQrStatus(QRCashTxnStatusCode.FAILED.getWingCode());
+        }
+        transaction.setTxnStatusCode(request.getString("txnStatusCode"));
+        transaction.setTxnStatusInfo(request.getString("txnStatusInfo"));
+        transaction.setModifiedOn(changeToPSPDateTimeFormat(request.getString("trxTimeStamp")));
         mtxQrCashDepositWithdrawalRepository.save(transaction);
 	}
 
@@ -223,7 +226,15 @@ public class QRCashServiceImpl implements QRCashService {
 		log.info("{} Request URL: {}", key, atmCashInUrl);
 		log.info("{} Request Headers: {}", key, headers);
 		log.info("{} Request Data: {}", key, gson.toJson(reqPostTxn));
-		String resp = "{\"code\":200,\"message\":\"successful\"}";
+//		String resp = ClientGateWay.send(
+//				atmCashInUrl, 
+//				30000, 
+//				gson.toJson(reqPostTxn), 
+//				HttpMethod.POST, 
+//				headers, 
+//				false);
+		String resp= "{\"code\":200,\"message\":\"successful\"}";
+		log.info("{} response from backend mobile: {}", key, resp);
 		
 		Data respPostTxn = gson.fromJson(resp, Data.class);
 		if(respPostTxn.getString("code") == null) {
@@ -234,27 +245,27 @@ public class QRCashServiceImpl implements QRCashService {
 		return respPostTxn;
 	}
 
-	private Data respondUpdateStatusError(Data reqData) throws Exception {
+	private Data respondUpdateStatusError(Data request) throws Exception {
 		Data response  = new Data();
-		response.setString("serviceCode", reqData.getString("serviceCode"));
-		response.setString("reqID", reqData.getString("reqID"));
-		response.setString("atmID", reqData.getString("atmID"));
-		response.setString("trxRefNo", reqData.getString("trxRefNo"));
+		response.setString("serviceCode", request.getString("serviceCode"));
+		response.setString("reqID", request.getString("reqID"));
+		response.setString("atmID", request.getString("atmID"));
+		response.setString("trxRefNo", request.getString("trxRefNo"));
 		response.setInt("statusCode", QRCashTxnStatusCode.FAILED.getBtiCode());
 		response.setString("statusInfo", QRCashTxnStatusCode.FAILED.getBtiDescription());
-		response.setString("trxType", reqData.getString("trxType"));
-		response.setString("trxTimeStamp", reqData.getString("trxTimeStamp"));
-		response.setString("trxAccountNo", reqData.getString("trxAccountNo"));
-		response.setString("trxCurrency", reqData.getString("trxCurrency"));
-		response.setLong("trxAmount", reqData.getLong("trxAmount"));
-		response.setString("txnStatusCode", reqData.getString("txnStatusCode"));
-		response.setString("txnStatusInfo", reqData.getString("txnStatusInfo"));
+		response.setString("trxType", request.getString("trxType"));
+		response.setString("trxTimeStamp", request.getString("trxTimeStamp"));
+		response.setString("trxAccountNo", request.getString("trxAccountNo"));
+		response.setString("trxCurrency", request.getString("trxCurrency"));
+		response.setLong("trxAmount", request.getLong("trxAmount"));
+		response.setString("txnStatusCode", request.getString("txnStatusCode"));
+		response.setString("txnStatusInfo", request.getString("txnStatusInfo"));
 
 		return response;
 	}
 
-	private void validateUpdateStatus(Data reqData) throws Exception, ApplicationException {
-		ValidatorUtil.validateRequireFields(reqData, 
+	private void validateUpdateStatus(Data request) throws Exception, ApplicationException {
+		UtilValidater.validateRequireFields(request, 
 				"serviceCode",
 				"reqID",
 				"atmID",
@@ -269,10 +280,10 @@ public class QRCashServiceImpl implements QRCashService {
 //				"cashRetractStatus" saw in doc spec but seem not use.
 				);
 
-		int trxAmount = reqData.getInt("trxAmount");
-		String trxCurrency = reqData.getString("trxCurrency");
-		String serviceCode = reqData.getString("serviceCode");
-		String trxType = reqData.getString("trxType");
+		int trxAmount = request.getInt("trxAmount");
+		String trxCurrency = request.getString("trxCurrency");
+		String serviceCode = request.getString("serviceCode");
+		String trxType = request.getString("trxType");
 		
 		if (!serviceCode.equals("STATUS_UPDATE")) {
 			log.error("{} <<<< Error: serviceCode is invalid. serviceCode: {}", key, serviceCode);
@@ -295,8 +306,8 @@ public class QRCashServiceImpl implements QRCashService {
 		}
 	}
 
-	private void validateGenerateQR(Data reqData) throws Exception {
-		ValidatorUtil.validateRequireFields(reqData, 
+	private void validateGenerateQR(Data request) throws Exception {
+		UtilValidater.validateRequireFields(request, 
 				"serviceCode",
 				"reqID",
 				"atmID",
@@ -306,10 +317,10 @@ public class QRCashServiceImpl implements QRCashService {
 				"genCurrency"
 				);
 
-		String serviceCode = reqData.getString("serviceCode");
-		String genCurrency = reqData.getString("genCurrency");
-		String genType = reqData.getString("genType");
-		int genAmount = reqData.getInt("genAmount");
+		String serviceCode = request.getString("serviceCode");
+		String genCurrency = request.getString("genCurrency");
+		String genType = request.getString("genType");
+		int genAmount = request.getInt("genAmount");
 		
 		if (!serviceCode.equals("GENERATE_QR")) {
 			log.error("{} <<<< Error: serviceCode is invalid. serviceCode: {}", key, serviceCode);
@@ -337,48 +348,48 @@ public class QRCashServiceImpl implements QRCashService {
 		}
 	}
 	
-	private Data respondGenerateQRError(Data reqData) throws Exception {
+	private Data respondGenerateQRError(Data request) throws Exception {
 		Data response = new Data();
-		response.setString("serviceCode", reqData.getString("serviceCode"));
-		response.setString("reqID", reqData.getString("reqID"));
-		response.setString("atmID", reqData.getString("atmID"));
-		response.setString("genTimeStamp", reqData.getString("genTimeStamp"));
-		response.setString("genType", reqData.getString("genType"));
-		response.setString("genCurrency", reqData.getString("genCurrency"));
-		response.setInt("qrType", reqData.getInt("qrType"));
+		response.setString("serviceCode", request.getString("serviceCode"));
+		response.setString("reqID", request.getString("reqID"));
+		response.setString("atmID", request.getString("atmID"));
+		response.setString("genTimeStamp", request.getString("genTimeStamp"));
+		response.setString("genType", request.getString("genType"));
+		response.setString("genCurrency", request.getString("genCurrency"));
+		response.setInt("qrType", request.getInt("qrType"));
 		response.setInt("statusCode", QRCashTxnStatusCode.FAILED.getBtiCode());
 		response.setString("statusInfo", QRCashTxnStatusCode.FAILED.getBtiDescription());
 
 		return response;
 	}
 
-	private Data respondInquireStatusError(Data reqData) throws Exception {
+	private Data respondInquireStatusError(Data request) throws Exception {
 		Data response = new Data();
-		response.setString("serviceCode", reqData.getString("serviceCode"));
-		response.setString("reqID", reqData.getString("reqID"));
-		response.setString("atmID", reqData.getString("atmID"));
-		response.setString("trxRefNo", reqData.getString("trxRefNo"));
+		response.setString("serviceCode", request.getString("serviceCode"));
+		response.setString("reqID", request.getString("reqID"));
+		response.setString("atmID", request.getString("atmID"));
+		response.setString("trxRefNo", request.getString("trxRefNo"));
 		response.setInt("statusCode", QRCashTxnStatusCode.FAILED.getBtiCode());
 		response.setString("statusInfo", QRCashTxnStatusCode.FAILED.getBtiDescription());
 
 		return response;
 	}
 
-	private void validateInquireStatus(Data reqData) throws Exception {
-		ValidatorUtil.validateRequireFields(reqData, "serviceCode", "reqID", "atmID", "trxRefNo");
+	private void validateInquireStatus(Data request) throws Exception {
+		UtilValidater.validateRequireFields(request, "serviceCode", "reqID", "atmID", "trxRefNo");
 
-		String serviceCode = reqData.getString("serviceCode");
+		String serviceCode = request.getString("serviceCode");
 		if (!serviceCode.equals("INQUIRY_STATUS")) {
 			log.error("{} <<<< Error: serviceCode is invalid. serviceCode: {}", key, serviceCode);
 			throw new ApplicationException(ErrorCode.SERVICE_NOT_ALLOWED);
 		}
 	}
 
-	private Data retrieveQRCashTxn(Data reqData) throws Exception {
+	private Data retrieveQRCashTxn(Data request) throws Exception {
 		return mtxQrCashDepositWithdrawalRepository.retrieveQRCashTxn(
-				reqData.getString("reqID"),
-				reqData.getString("atmID"), 
-				reqData.getString("trxRefNo")
+				request.getString("reqID"),
+				request.getString("atmID"), 
+				request.getString("trxRefNo")
 				);
 	}
 

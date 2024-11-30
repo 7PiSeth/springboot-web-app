@@ -39,7 +39,7 @@
                 ATTR_3_NAME "attr3Name",
                 ATTR_3_VALUE "attr3Value"
             FROM
-                QR_CASH_TXN
+                MTX_QR_CASH_DEPOSIT_WITHDRAWAL
             WHERE
                 REQ_ID = :reqId
                 AND ATM_ID = :atmId

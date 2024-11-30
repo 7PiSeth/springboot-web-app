@@ -8,7 +8,7 @@ import phnomden.dto.Data;
 import phnomden.exception.ApplicationException;
 
 @Log4j2
-public class ValidatorUtil {
+public class UtilValidater {
 	/**
 	 * @param sample <pre>
 	 * String [][] requireFields = {

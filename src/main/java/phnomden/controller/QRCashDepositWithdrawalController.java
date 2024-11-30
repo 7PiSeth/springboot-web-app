@@ -15,17 +15,17 @@ public class QRCashDepositWithdrawalController {
 	QRCashService qrCashService;
 
 	@PostMapping("/generate-qr")
-	public ResponseEntity<Data> generateQR(@RequestBody Data reqData) throws Exception {
-		return qrCashService.generateQR(reqData);
+	public ResponseEntity<Data> generateQR(@RequestBody Data request) throws Exception {
+		return qrCashService.generateQR(request);
 	}
 
 	@PostMapping("/inquire-status")
-	public ResponseEntity<Data> inquireStatus(@RequestBody Data reqData) throws Exception {
-		return qrCashService.inquireStatus(reqData);
+	public ResponseEntity<Data> inquireStatus(@RequestBody Data request) throws Exception {
+		return qrCashService.inquireStatus(request);
 	}
 
 	@PostMapping("/update-status")
-	public ResponseEntity<Data> updateStatus(@RequestBody Data reqData) throws Exception {
-		return qrCashService.updateStatus(reqData);
+	public ResponseEntity<Data> updateStatus(@RequestBody Data request) throws Exception {
+		return qrCashService.updateStatus(request);
 	}
 }

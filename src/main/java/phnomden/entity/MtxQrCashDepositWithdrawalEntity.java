@@ -14,7 +14,7 @@ import lombok.experimental.FieldDefaults;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-@Table(name = "QR_CASH_TXN",  schema = "PUBLIC")
+@Table(name = "MTX_QR_CASH_DEPOSIT_WITHDRAWAL",  schema = "PUBLIC")
 @Setter
 @Getter
 public class MtxQrCashDepositWithdrawalEntity {
