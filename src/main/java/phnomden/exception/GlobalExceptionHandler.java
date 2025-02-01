@@ -9,12 +9,14 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<Object> handleResourceNotFoundException(ResourceNotFoundException ex) {
+    	ex.printStackTrace();
         ErrorCode ErrorCode = new ErrorCode("RESOURCE_NOT_FOUND", ex.getMessage());
         return new ResponseEntity<>(ErrorCode, HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Object> handleGlobalException(Exception ex) {
+    	ex.printStackTrace();
         ErrorCode ErrorCode = new ErrorCode("INTERNAL_SERVER_ERROR", "An unexpected error occurred.");
         return new ResponseEntity<>(ErrorCode, HttpStatus.INTERNAL_SERVER_ERROR);
     }
